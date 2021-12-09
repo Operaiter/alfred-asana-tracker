@@ -4,8 +4,6 @@
 <dict>
 	<key>bundleid</key>
 	<string>it.ggallo.asana</string>
-	<key>category</key>
-	<string>Productivity</string>
 	<key>connections</key>
 	<dict>
 		<key>0C4BE506-024B-42E9-B927-6038D381B10B</key>
@@ -37,7 +35,17 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>B9CE2989-5779-4950-BAE3-14C535A76B44</string>
+				<string>3D596172-A5CE-41DA-81E1-12F3C22D9AF6</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>40B1621E-9C30-4374-9F8B-95375706B1C6</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -104,6 +112,19 @@
 			<dict>
 				<key>destinationuid</key>
 				<string>F0C22B21-294E-435D-83CA-A0BEA8D92CA0</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>40B1621E-9C30-4374-9F8B-95375706B1C6</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>B9CE2989-5779-4950-BAE3-14C535A76B44</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -1215,6 +1236,9 @@ def main(wf):
     }
     wf.store_data("task_info", task_info)
     sys.stdout.write(field["name"])
+    wf.logger.debug(task["gid"])
+    wf.logger.debug(field["gid"])
+    wf.logger.debug(get_field_value(task, field["gid"]))
     return 0
 
 
@@ -1701,6 +1725,25 @@ if __name__ == "__main__":
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>browser</key>
+				<string>com.apple.Safari</string>
+				<key>spaces</key>
+				<string></string>
+				<key>url</key>
+				<string>{query}</string>
+				<key>utf8</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>3D596172-A5CE-41DA-81E1-12F3C22D9AF6</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>concurrently</key>
 				<false/>
 				<key>escaping</key>
@@ -1708,6 +1751,7 @@ if __name__ == "__main__":
 				<key>script</key>
 				<string>import os
 import sys
+import json
 
 from asana.api import create_task
 from utils import get_token
@@ -1720,10 +1764,13 @@ def main(wf):
     task_name = os.getenv("task_name")
     project_gid = wf.settings["project_gid"]
 
-    create_task(token, {"name": task_name, "projects": [project_gid], "assignee": "me"})
+    response = create_task(token, {"name": task_name, "projects": [project_gid], "assignee": "me"})
     run_in_background("update_tasks", ["/usr/bin/python", wf.workflowfile("update_tasks.py")])
 
-    sys.stdout.write(task_name)
+    url = response["permalink_url"]
+    url += '/f/'
+
+    sys.stdout.write(url)
     return 0
 
 
@@ -1819,27 +1866,6 @@ if __name__ == "__main__":
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>lastpathcomponent</key>
-				<false/>
-				<key>onlyshowifquerypopulated</key>
-				<false/>
-				<key>removeextension</key>
-				<false/>
-				<key>text</key>
-				<string>{query}</string>
-				<key>title</key>
-				<string>Task created</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.output.notification</string>
-			<key>uid</key>
-			<string>B9CE2989-5779-4950-BAE3-14C535A76B44</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
 				<key>conditions</key>
 				<array>
 					<dict>
@@ -1898,6 +1924,44 @@ if __name__ == "__main__":
 			<string>alfred.workflow.utility.argument</string>
 			<key>uid</key>
 			<string>DF48C549-1ECF-4E52-9C1A-4FEF0124F209</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
+				<false/>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string>{query}</string>
+				<key>title</key>
+				<string>Task created</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>B9CE2989-5779-4950-BAE3-14C535A76B44</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>{var:task_name}</string>
+				<key>passthroughargument</key>
+				<false/>
+				<key>variables</key>
+				<dict/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>40B1621E-9C30-4374-9F8B-95375706B1C6</string>
 			<key>version</key>
 			<integer>1</integer>
 		</dict>
@@ -3260,6 +3324,20 @@ Version 0.1.0 - 2020-11-16
 			<key>ypos</key>
 			<integer>910</integer>
 		</dict>
+		<key>3D596172-A5CE-41DA-81E1-12F3C22D9AF6</key>
+		<dict>
+			<key>xpos</key>
+			<integer>1060</integer>
+			<key>ypos</key>
+			<integer>590</integer>
+		</dict>
+		<key>40B1621E-9C30-4374-9F8B-95375706B1C6</key>
+		<dict>
+			<key>xpos</key>
+			<integer>1010</integer>
+			<key>ypos</key>
+			<integer>735</integer>
+		</dict>
 		<key>40CF6DB0-8C55-4F34-A715-41FE82053916</key>
 		<dict>
 			<key>colorindex</key>
@@ -3477,9 +3555,9 @@ Version 0.1.0 - 2020-11-16
 			<key>colorindex</key>
 			<integer>4</integer>
 			<key>xpos</key>
-			<integer>830</integer>
+			<integer>1060</integer>
 			<key>ypos</key>
-			<integer>640</integer>
+			<integer>705</integer>
 		</dict>
 		<key>BB07AF18-F262-4F34-85DE-6905401946AC</key>
 		<dict>

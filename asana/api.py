@@ -113,6 +113,7 @@ def create_task(token, data):
         content=True,
         data=data,
     )
+    return response.json()["data"]
 
 
 def get_task(token, task_gid):
